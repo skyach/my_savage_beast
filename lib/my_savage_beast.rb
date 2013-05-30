@@ -36,26 +36,26 @@ end
 # Add our models and controllers to the application
 # Stolen from http://weblog.techno-weenie.net/2007/1/24/understanding-the-rails-initialization-process
 # You can't use config.load_paths because #set_autoload_paths has already been called in the Rails Initialization process
-models_path = File.join(directory, 'app', 'models')
-$LOAD_PATH << models_path
-Dependencies.load_paths << models_path
+#models_path = File.join(directory, 'app', 'models')
+#$LOAD_PATH << models_path
+#Dependencies.load_paths << models_path
 
-controller_path = File.join(directory, 'app', 'controllers')
-$LOAD_PATH << controller_path
-Dependencies.load_paths << controller_path
-config.controller_paths << controller_path
+#controller_path = File.join(directory, 'app', 'controllers')
+#$LOAD_PATH << controller_path
+#Dependencies.load_paths << controller_path
+#config.controller_paths << controller_path
 
-view_path = File.join(directory, 'app', 'views')
-if File.exist?(view_path)
-	ActionController::Base.view_paths.insert(1, view_path) # push it just underneath the app
-end
+#view_path = File.join(directory, 'app', 'views')
+#if File.exist?(view_path)
+#	ActionController::Base.view_paths.insert(1, view_path) # push it just underneath the app
+#end
 
-Include helpers
-ActionView::Base.send :include, ForumsHelper
-ActionView::Base.send :include, ApplicationHelper
-ActionView::Base.send :include, ModeratorsHelper
-ActionView::Base.send :include, PostsHelper
-ActionView::Base.send :include, TopicsHelper
+# Include helpers
+#ActionView::Base.send :include, ForumsHelper
+#ActionView::Base.send :include, ApplicationHelper
+#ActionView::Base.send :include, ModeratorsHelper
+#ActionView::Base.send :include, PostsHelper
+#ActionView::Base.send :include, TopicsHelper
 #--------------------------------------------------------------------------------
 
 begin
