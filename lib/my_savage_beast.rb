@@ -1,15 +1,14 @@
+require 'savage_beast/application_helper'
+require 'savage_beast/authentication_system'
+require 'savage_beast/user_init'
+require 'savage_beast/engine' if defined?(Rails)
+
 ActionView::Base.send :include, SavageBeast::AuthenticationSystem
 ActionController::Base.send :include, SavageBeast::AuthenticationSystem
 # You need to include SavageBeast::ApplicationHelper.  Doing it this way
 # makes it be unincluded after the second request when working in development environment.
 #ApplicationHelper.send :include, SavageBeast::ApplicationHelper
 
-# FIX for engines model reloading issue in development mode
-if ENV['RAILS_ENV'] != 'production'
-	load_paths.each do |path|
-		ActiveSupport::Dependencies.autoload_once_paths.delete(path)
-	end
-end
 
 # Include your application configuration below
 # @WBH@ would be nice for this to not be necessary somehow...
@@ -26,18 +25,10 @@ Module.class_eval do
 end
 
 
-# All this is given in engines plugin
-# Define the means by which to add our own routing to Rails' routing
-class ActionController::Routing::RouteSet::Mapper
-	def from_plugin(name)
-		eval File.read(File.join(RAILS_ROOT, "vendor/plugins/#{name}/routes.rb"))
-	end
-end
-
 #--------------------------------------------------------------------------------
-# Uncommenting this section of code allows the plugin to work without the engines plugin 
+# Uncommenting this section of code allows the plugin to work without the engines plugin
 # installed.  Just need to copy the helpers into the lib directory.
-# So why use Engines?  
+# So why use Engines?
 # It allows controller methods to be overridden
 # It gives an easy way to access images
 # It allows controller views to be overridden
@@ -70,7 +61,7 @@ ActionView::Base.send :include, TopicsHelper
 begin
   require 'gettext/rails'
   GetText.locale = "nl" # Change this to your preference language
-  #puts "GetText found!"
+                        #puts "GetText found!"
 rescue MissingSourceFile, LoadError
   #puts "GetText not found.  Using English."
   class ActionView::Base
@@ -79,4 +70,6 @@ rescue MissingSourceFile, LoadError
     end
   end
 end
+
+
 
