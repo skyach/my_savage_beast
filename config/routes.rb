@@ -6,7 +6,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :posts, :as => "all_posts" do
+  resources :posts do
     collection do
       get :index, :as => "all"
       get :search, :as => "search_all"
