@@ -1,8 +1,8 @@
 class ForumsController < ApplicationController
   
-	before_filter :login_required
-  before_filter :find_or_initialize_forum, :except => :index
-	before_filter :admin?, :except => [:show, :index]
+	before_action :login_required
+  before_action :find_or_initialize_forum, :except => :index
+	before_action :admin?, :except => [:show, :index]
 
   cache_sweeper :posts_sweeper, :only => [:create, :update, :destroy]
 
@@ -24,7 +24,7 @@ class ForumsController < ApplicationController
         (session[:forum_page] ||= Hash.new(1))[@forum.id] = params[:page].to_i if params[:page]
 
         @topics = @forum.topics.paginate :page => params[:page]
-        User.find(:all, :conditions => ['id IN (?)', @topics.collect { |t| t.replied_by }.uniq]) unless @topics.blank?
+        User.where('id IN (?)', @topics.collect { |t| t.replied_by }.uniq) unless @topics.blank?
       end
       format.xml { render :xml => @forum }
     end

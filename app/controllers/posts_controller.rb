@@ -1,7 +1,6 @@
 class PostsController < ApplicationController
-  before_filter :find_post,      :except => [:index, :create, :monitored, :search]
-  before_filter :login_required, :except => [:index, :monitored, :search, :show]
-  @@query_options = { :select => "#{Post.table_name}.*, #{Topic.table_name}.title as topic_title, #{Forum.table_name}.name as forum_name", :joins => "inner join #{Topic.table_name} on #{Post.table_name}.topic_id = #{Topic.table_name}.id inner join #{Forum.table_name} on #{Topic.table_name}.forum_id = #{Forum.table_name}.id" }
+  before_action :find_post,      :except => [:index, :create, :monitored, :search]
+  before_action :login_required, :except => [:index, :monitored, :search, :show]
 
 	# @WBH@ TODO: This uses the caches_formatted_page method.  In the main Beast project, this is implemented via a Config/Initializer file.  Not
 	# sure what analogous place to put it in this plugin.  It don't work in the init.rb
@@ -12,26 +11,23 @@ class PostsController < ApplicationController
     conditions = []
     [:user_id, :forum_id, :topic_id].each { |attr| conditions << Post.send(:sanitize_sql, ["#{Post.table_name}.#{attr} = ?", params[attr]]) if params[attr] }
     conditions = conditions.empty? ? nil : conditions.collect { |c| "(#{c})" }.join(' AND ')
-    @posts = Post.paginate @@query_options.merge(:conditions => conditions, :page => params[:page], :count => {:select => "#{Post.table_name}.id"}, :order => post_order)
-    @users = User.find(:all, :select => 'distinct *', :conditions => ['id in (?)', @posts.collect(&:user_id).uniq]).index_by(&:id)
+    @posts = Post.select_and_join_data.where(conditions).order(post_order).paginate(page: params[:page])
+    @users = User.select('distinct *').where('id in (?)', @posts.collect(&:user_id).uniq).index_by(&:id)
     render_posts_or_xml
   end
 
   def search		
     conditions = params[:q].blank? ? nil : Post.send(:sanitize_sql, ["LOWER(#{Post.table_name}.body) LIKE ?", "%#{params[:q]}%"])
-    @posts = Post.paginate @@query_options.merge(:conditions => conditions, :page => params[:page], :count => {:select => "#{Post.table_name}.id"}, :order => post_order)
-    @users = User.find(:all, :select => 'distinct *', :conditions => ['id in (?)', @posts.collect(&:user_id).uniq]).index_by(&:id)
+    @posts = Post.select_and_join_data.where(conditions).order(post_order).paginate(page: params[:page])
+    @users = User.select('distinct *').where('id in (?)', @posts.collect(&:user_id).uniq).index_by(&:id)
     render_posts_or_xml :index
   end
 
   def monitored
     @user = User.find params[:user_id]
-    options = @@query_options.merge(:conditions => ["#{Monitorship.table_name}.user_id = ? and #{Post.table_name}.user_id != ? and #{Monitorship.table_name}.active = ?", params[:user_id], @user.id, true])
-    options[:order]  = post_order
-    options[:joins] += " inner join #{Monitorship.table_name} on #{Monitorship.table_name}.topic_id = #{Topic.table_name}.id"
-    options[:page]   = params[:page]
-    options[:count]  = {:select => "#{Post.table_name}.id"}
-    @posts = Post.paginate options
+    query = "#{Monitorship.table_name}.user_id = #{params[:user_id]} and #{Post.table_name}.user_id != #{@user.id} and #{Monitorship.table_name}.active = #{true}"
+    join  = " inner join #{Monitorship.table_name} on #{Monitorship.table_name}.topic_id = #{Topic.table_name}.id"
+    @posts = Post.select_and_join_data(join).where(query).order(post_order).paginate(page: params[:page])
     render_posts_or_xml
   end
 
@@ -43,7 +39,7 @@ class PostsController < ApplicationController
   end
 
   def create
-    @topic = Topic.find_by_id_and_forum_id(params[:topic_id],params[:forum_id])
+    @topic = Topic.find_by(id: params[:topic_id], fourm_id: params[:forum_id])
     if @topic.locked?
       respond_to do |format|
         format.html do
@@ -121,7 +117,7 @@ class PostsController < ApplicationController
     end
     
     def find_post			
-			@post = Post.find_by_id_and_topic_id_and_forum_id(params[:id], params[:topic_id], params[:forum_id]) || raise(ActiveRecord::RecordNotFound)
+			@post = Post.find_by(id: params[:id], topic_id: params[:topic_id], forum_id: params[:forum_id]) || raise(ActiveRecord::RecordNotFound)
     end
     
     def render_posts_or_xml(template_name = action_name)

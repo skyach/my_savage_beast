@@ -22,11 +22,15 @@ class Post < ActiveRecord::Base
     options[:except] << :topic_title << :forum_name
     super
   end
+  def self.select_and_join_data(q = '')
+    select("#{Post.table_name}.*, #{Topic.table_name}.title as topic_title, #{Forum.table_name}.name as forum_name").joins("inner join #{Topic.table_name} on #{Post.table_name}.topic_id = #{Topic.table_name}.id inner join #{Forum.table_name} on #{Topic.table_name}.forum_id = #{Forum.table_name}.id" + q)
+  end
   
   protected
     # using count isn't ideal but it gives us correct caches each time
     def update_cached_fields
-      Forum.update_all ['posts_count = ?', Post.count(:id, :conditions => {:forum_id => forum_id})], ['id = ?', forum_id]
+      # Forum.update_all ['posts_count = ?', Post.count(:id, :conditions => {:forum_id => forum_id})], ['id = ?', forum_id]
+      Forum.where(id: forum_id).update_all('posts_count = ?', Post.where(:forum_id => forum_id).count)
       User.update_posts_count(user_id)
       topic.update_cached_post_fields(self)
     end

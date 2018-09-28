@@ -62,7 +62,7 @@ begin
   require 'gettext/rails'
   GetText.locale = "nl" # Change this to your preference language
                         #puts "GetText found!"
-rescue MissingSourceFile, LoadError
+rescue LoadError
   #puts "GetText not found.  Using English."
   class ActionView::Base
     def _(s)

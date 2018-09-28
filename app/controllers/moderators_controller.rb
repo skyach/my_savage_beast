@@ -2,7 +2,7 @@ class ModeratorsController < ApplicationController
   before_filter :login_required
 
   def destroy
-    Moderatorship.delete_all ['id = ?', params[:id]]
+    Moderatorship.where('id = ?', params[:id]).delete_all
     redirect_to user_path(params[:user_id])
   end
   
