@@ -15,7 +15,7 @@ class Topic < ActiveRecord::Base
   has_many :posts,  -> { order("#{Post.table_name}.created_at") }, :dependent => :delete_all
   has_one  :recent_post, -> { order("#{Post.table_name}.created_at DESC") }, :class_name => 'Post'
   
-  has_many :voices, :through => :posts, :source => :user, :uniq => true
+  has_many :voices, -> { uniq } , :through => :posts, :source => :user
   belongs_to :replied_by_user, :foreign_key => "replied_by", :class_name => "User"
 
   attr_accessible :title
