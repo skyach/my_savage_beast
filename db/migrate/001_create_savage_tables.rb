@@ -1,4 +1,4 @@
-class CreateSavageTables < ActiveRecord::Migration
+class CreateSavageTables < ActiveRecord::Migration[5.2]
 	def self.up
 		create_table "forums", :force => true do |t|
 	    t.string  "name"
