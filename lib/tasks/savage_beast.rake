@@ -58,7 +58,7 @@ namespace :savage_beast do
 =end
 end
 
-class CreateSavageTables < ActiveRecord::Migration
+class CreateSavageTables < ActiveRecord::Migration[5.2]
 	def self.up
 		create_table "forums" do |t|
 	    t.string  "name"
