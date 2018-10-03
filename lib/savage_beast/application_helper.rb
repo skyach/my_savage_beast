@@ -14,6 +14,18 @@ module SavageBeast
 		end
 =end
 
+		def admin?
+			current_user.admin?
+		end
+
+		def currently_online
+			false
+		end
+
+		def display_name
+			current_user.username
+		end
+
 		def ajax_spinner_for(id, spinner="spinner.gif")
 			"<img src='/plugin_assets/savage_beast/images/#{spinner}' style='display:none; vertical-align:middle;' id='#{id.to_s}_spinner'> "
 		end
@@ -37,7 +49,7 @@ module SavageBeast
 
 		def feed_icon_tag(title, url)
 			(@feed_icons ||= []) << { :url => url, :title => title }
-			link_to image_tag('savage_beast/feed-icon.png', :size => '14x14', :style => 'margin-right:5px', :alt => "Subscribe to #{title}"), url
+			link_to image_tag('my_savage_beast/feed-icon.png', :size => '14x14', :style => 'margin-right:5px', :alt => "Subscribe to #{title}"), url
 		end
 
 		def search_posts_title
@@ -66,6 +78,22 @@ module SavageBeast
 			options[:q] ? search_all_posts_path(options) : send("all_posts_path", options)
 		end
 
+		def topics_locale(count)
+			t(count == 1 ? 'topic_count' : 'topics_count', count: number_with_delimiter(count))
+		end
+
+		def posts_locale(count)
+			t(count == 1 ? 'post_count' : 'posts_count', count: number_with_delimiter(count))
+		end
+
+		def posts_count_locale(count)
+			t(count == 1 ? 'post_count_found' : 'posts_count_found', count: number_with_delimiter(count))
+		end
+
+		def voice_locale(count)
+			t(count == 1 ? 'voice_count' : 'voices_count', count: number_with_delimiter(count))
+		end
+
 =begin
 		# on windows and this isn't working like you expect?
 		# check: http://beast.caboo.se/forums/1/topics/657
@@ -88,5 +116,7 @@ module SavageBeast
 		end
 
 =end
+
+
 	end
 end

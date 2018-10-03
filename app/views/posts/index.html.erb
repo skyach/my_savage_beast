@@ -9,7 +9,7 @@
 </h1>
 <p class="subtitle">
   <%= feed_icon_tag @page_title, search_posts_path(true) %>
-  <%= '{count} post(s) found'[(count=@posts.total_entries)==1 ? :post_count_found : :posts_count_found, number_with_delimiter(count)] %>
+  <%= posts_count_locale(@posts.total_entries) %>
 </p>
 
 <%= will_paginate @posts %>
@@ -35,7 +35,7 @@
 
     <%= avatar_for @users[post.user_id] %>
     <span class="fn"><%= link_to truncate(h(@users[post.user_id].display_name), 15), user_path(post.user_id) %></span>
-    <span class="posts"><%= '{count} posts'[(count=@users[post.user_id].posts.size)==1 ? :post_count : :posts_count, number_with_delimiter(count)] %></span>
+    <span class="posts"><%= posts_locale(@users[post.user_id].posts.count) %></span>
   </td>
   <td class="body entry-content">
     <p class="topic">

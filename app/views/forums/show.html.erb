@@ -30,9 +30,9 @@
 </h1>
 
 <p class="subtitle">
-  <%= feed_icon_tag @forum.name, forum_posts_path(@forum, :format => :rss) %> 
-  <%= '{count} topic(s)'[(count=@forum.topics.size)==1 ? :topic_count : :topics_count, number_with_delimiter(count)] %>, 
-  <%= '{count} post(s)'[(count=@forum.posts.size)==1 ? :post_count : :posts_count, number_with_delimiter(count)] %>
+  <%= feed_icon_tag @forum.name, forum_posts_path(@forum, :format => :rss) %>
+  <%= topics_locale(@forum.topics.count) %>,
+  <%= posts_locale(@forum.posts.count) %>
 </p>
 	
 <% if @topics.total_pages > 1 -%>
@@ -62,9 +62,9 @@
     end
     %>
     <% if recent_topic_activity(topic) %>
-    <%= image_tag "savage_beast/clearbits/#{icon}.gif", :class => "icon green", :title => "Recent activity"[]+"#{post}" %>
+    <%= image_tag "my_savage_beast/clearbits/#{icon}.gif", :class => "icon green", :title => "Recent activity"[]+"#{post}" %>
     <% else %>
-      <%= image_tag "savage_beast/clearbits/#{icon}.gif", :class => "icon grey #{color}", :title => "No recent activity"[]+"#{post}" %>
+      <%= image_tag "my_savage_beast/clearbits/#{icon}.gif", :class => "icon grey #{color}", :title => "No recent activity"[]+"#{post}" %>
     <% end %>
   </td>
   <td class="c2">

@@ -14,7 +14,7 @@ namespace :savage_beast do
 
 	desc "Copy the stylesheets and Javascripts used natively by bloggity into host app's public directory"
 	task :bootstrap_assets => :environment do
-		destination_root = RAILS_ROOT + "/public/"
+		destination_root = Rails.root + "/public/"
     %w(stylesheets images).each{|asset|
       destination_path = destination_root + asset
       FileUtils.mkpath(destination_path) unless File.exists?(destination_path)
