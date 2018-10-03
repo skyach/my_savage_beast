@@ -1,75 +1,97 @@
-<% content_for :right do %>
+<% @page_title = "ViewGuide Forum" %>
+<% @page_id = "forum" %>
+<% content_for :page_stylesheet do -%>
+  <%= stylesheet_link_tag 'forum' %>
+<% end -%>
 
-<% if admin? %>
-<h6><%= "Admin" %></h6>
-<p><%= link_to 'Create New Forum', new_forum_path, :class => "utility" %></p>
-<% end %>
+<div id="content-left">
 
-<% end %>
+  <% if admin? %>
+    <h6><%= t('admin_title') %></h6>
+    <p><%= link_to t('create_new_forum'), new_forum_path, :class => "utility" %></p>
+  <% end %>
 
-<h1 style="margin-top:0;"><%= 'Forums' %></h1>
-<p class="subtitle">
-<%= feed_icon_tag "Recent Posts", all_posts_path(:format => 'rss') %>
-  <%= topics_locale(Topic.count) %>,
-  <%= posts_locale(Post.count) %>, <%= voice_locale(User.where("posts_count > 0").count) %>
 
-</p>
-
-<table border="0" cellspacing="0" cellpadding="0" class="wide forums">
-  <tr>
-    <th class="la" width="70%" colspan="3"><%= 'Forum' %></th>
-<!--
-    <th width="5%">Topics</th>
-    <th width="5%">Posts</th>
--->
-    <th class="la" width="30%" colspan="1"><%= 'Last Post' %></th>
-  </tr>
-<% for forum in @forums do %>  
-  <tr>
-    <td class="vat c1">
-    
-      <% if recent_forum_activity(forum) %>
-      <%= image_tag "my_savage_beast/clearbits/comment.gif", :class => "icon green", :title => 'Recent activity' %>
-      <% else %>
-      <%= image_tag "my_savage_beast/clearbits/comment.gif", :class => "icon grey", :title => 'No recent activity' %>
-      <% end %>
-    </td>
-    <td class="c2 vat">
-      <%= link_to h(forum.name), forum_path(forum), :class => "title" %>
-      <div class="posts">
-        <%= topics_locale(Topic.count) %>
-        <%= posts_locale(Post.count) %>
+  <div id="forum-block" class="bchip nocrumbs">
+    <div class="widget-wrap">
+      <h2 class="chip-header"><em><%= t('forums_title') %></em></h2>
+      <div id="info-widget">
+        <%#= feed_icon_tag "Recent Posts"[:recent_posts], formatted_posts_path(:format => 'rss') %>
+        <%= topics_locale(Topic.count) %>,
+        <%= posts_locale(Post.count) %>, <%= voice_locale(User.where("posts_count > 0").count) %>
       </div>
-      <p class="desc"><%= forum.description_html %>
-        </p>
-    </td>
-    <td class="c3">
-      <%= link_to 'Edit', edit_forum_path(forum), :class => "tiny", :rel => "directory", :style => "float:right" if admin? %>
-    </td>
+    </div>
+    <div class="inner">
+      <table border="0" cellspacing="0" cellpadding="0" class="wide forums">
+        <tr>
+          <th class="l-cell la" width="70%" colspan="1"><%= t('forum_title') %></th>
+          <!--
+            <th width="5%">Topics</th>
+            <th width="5%">Posts</th>
+          -->
+          <th class="la" width="30%" colspan="1"><%= t('last_post') %></th>
+        </tr>
+        <% forum_counter = 0 %>
+        <% for forum in @forums do %>
+          <% forum_counter = forum_counter + 1 %>
+          <tr<% if forum_counter % 2 == 0 %> class="stripe"<% end %>>
+            <!--
+  					<td class="l-cell vat c1">
+  						<%# if recent_forum_activity(forum) %>
+  						<%#= image_tag "clearbits/comment.gif", :class => "icon green", :title => 'Recent activity'[:recent_activity], :plugin => "savage_beast" %>
+  						<%# else %>
+  						<%#= image_tag "clearbits/comment.gif", :class => "icon grey", :title => 'No recent activity'[:no_recent_activity], :plugin => "savage_beast" %>
+  						<%# end %>
+  					</td>
+  				-->
+            <td class="l-cell c2 vat">
+              <%= link_to h(forum.name), forum_path(forum), :class => "title" %>
+              &nbsp;<%= link_to t('edit_title'), edit_forum_path(forum), :class => "tiny", :rel => "directory"  if admin? %>
+              <%= link_to t('delete_title'), forum_path(forum), :confirm => "Are you sure ? This will delete the forum and all its topics", :method => :delete if admin?%>
+              <div class="posts">
+                <%= topics_locale(Topic.count) %>
+                <%= posts_locale(Post.count) %>
+              </div>
+              <p class="desc"><%= raw forum.description_html %></p>
+            </td>
+            <!--  					<td class="c3">
 
-    <td class="inv lp">
-      <% if forum.recent_post %>
-        <%= time_ago_in_words(forum.recent_post.created_at) %><br />
-        <%= raw t('by_user', user: "<strong>#{h(forum.recent_post.user.display_name)}</strong>") %>
-        <span>(<%= link_to 'view', forum_topic_path(:forum_id => forum, :id => forum.recent_post.topic_id, :page => forum.recent_post.topic.last_page, :anchor => forum.recent_post.dom_id) %>)</span>
-      <% end %>
-    </td>
-  </tr>
-<% end %>
-</table>
+                        </td>-->
+            <td class="inv lp">
+              <% if forum.recent_post %>
+                <%= time_ago_in_words(forum.recent_post.created_at) %>
+                <br />
+                <%= raw t('by_user', user: "<strong>#{h(forum.recent_post.user.display_name)}</strong>") %>
+                <span>(<%= link_to 'view', topic_path(:forum_id => forum, :id => forum.recent_post.topic_id, :page => forum.recent_post.topic.last_page, :anchor => forum.recent_post.dom_id) %>)</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+    <div class="bottom-cap"></div>
+  </div>
 
-<p>
-  <%= link_to 'Recent posts', all_posts_path %>
-</p>
+  <%= link_to t('recent_posts'), all_posts_path, :class => 'outer' %>
 
-<% online_users = User.currently_online %>
-<% unless !online_users || online_users.empty? %>
-<div class="stats">
-<div class="users">
-<% unless !online_users || online_users.empty? %>
-<%= t('users_online') %> <%= online_users.map { |u| link_to "<strong>#{h u.display_name}</strong>", user_path(u) } * ", " %><br />
-<% end %>
+  <% online_users = User.currently_online -%>
+  <% unless !online_users || online_users.empty? %>
+    <div class="stats">
+      <div class="users">
+        <% unless !online_users || online_users.empty? %>
+          <%= t('users_online') %> <%= online_users.map { |u| link_to raw("<strong>#{h u.display_name}</strong>"), member_path(u) } * ", " %>
+          <br />
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div id="bottom-ads">
+    <div class="ad-728-90"><%= ad_chip('forum-1') %></div>
+  </div>
 </div>
-</div>
-<% end %>
 
+<div id="content-right">
+  <div id="side-ad-top" class="ad-160-600"><%= ad_chip('forum-2') %></div>
+  <div class="ad-160-600"><%= ad_chip('forum-3') %></div>
+</div>
