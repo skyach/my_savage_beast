@@ -4,7 +4,7 @@
 
 <h1><%= t('new_forum') %></h1>
 
-<% form_for :forum, :url => forums_path do |f| -%>
+<%= form_for :forum, :url => forums_path do |f| -%>
 <%= render :partial => "form", :object => f %>
 <%= submit_tag t('Create') -%> or <%= link_to(t('cancel'), forums_path) -%>
 <% end -%>
