@@ -77,6 +77,4 @@ var ReplyForm = {
   }
 }
 
-Event.addBehavior({
-  '#search,#monitor_submit': function() { this.hide(); }
-})
+jQuery(document).on('click', '#search,#monitor_submit', function(){ this.hide(); });
