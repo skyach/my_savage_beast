@@ -1,94 +1,117 @@
-<% content_for :right do %>
-
-<% unless @forum.description.blank? %>
-<%= @forum.description_html %>
-<hr />
-<% end %>
-
-<h5 style="margin-bottom:1.0em;"><%= t('moderators') %></h5>
-
-<% unless @forum.moderators.empty? -%>
-<ul class="flat" style="margin-top:1em;">
-<% @forum.moderators.each do |user| -%>
-  <li><%= link_to user.display_name, user_path(user) %></li>
-<% end -%>
-</ul>
-<% else -%>
-<p><%= t('forum_is_unmoderated') %></p>
-<p><%= t('please_be_courteous') %></p>
+<% @page_title = "ViewGuide Forum > #{@forum.name}" %>
+<% @page_id = "forum" %>
+<% content_for :page_stylesheet do -%>
+  <%= stylesheet_link_tag 'forum' %>
 <% end -%>
 
-<% end %>
+<div id="content-left">
+  <% content_for :right do %>
 
-<% @page_title = @forum.name %>
-
-<div class="crumbs">
-<%= link_to t('forums_title'), forums_path %> <span class="arrow">&rarr;</span>
-</div>
-<h1 style="margin-top:0.5em">
-  <%= h @forum.name %>
-</h1>
-
-<p class="subtitle">
-  <%= feed_icon_tag @forum.name, forum_posts_path(@forum, :format => :rss) %>
-  <%= topics_locale(@forum.topics.count) %>,
-  <%= posts_locale(@forum.posts.count) %>
-</p>
-	
-<% if @topics.total_pages > 1 -%>
-<% if logged_in? %>
-<p style="float:right; margin-top:0;"><%= link_to 'New topic', new_forum_topic_path(@forum), :class => "utility" %></p>
-<% end %>
-<%= will_paginate @topics %>
-<% end -%>
-
-<table border="0" cellspacing="0" cellpadding="0" class="wide topics">
-<tr>
-  <th class="la" colspan="2"><%= t('topic_title') %></th>
-  <th width="1%"><%= t('posts_title') %></th>
-  <th width="1%"><%= t('views_title')%></th>
-  <th class="la"><%= t('last_post') %></th>
-</tr>
-<% for topic in @topics %>
-<tr class="hentry">
-  <td style="padding:5px; width:16px;" class="c1">
-    <% 
-    icon = "comment"
-    color = ""
-    if topic.locked?
-      icon = "lock"
-      post = t('comma_locked_topic')
-      color = "darkgrey"
-    end
-    %>
-    <% if recent_topic_activity(topic) %>
-    <%= image_tag "my_savage_beast/clearbits/#{icon}.gif", :class => "icon green", :title => "Recent activity"+"#{post}" %>
-    <% else %>
-      <%= image_tag "my_savage_beast/clearbits/#{icon}.gif", :class => "icon grey #{color}", :title => "No recent activity"+"#{post}" %>
+    <% unless @forum.description.blank? %>
+      <%= @forum.description_html %>
+      <hr />
     <% end %>
-  </td>
-  <td class="c2">
-    <%= raw(t('sticky_title')+": <strong>") if topic.sticky? %>
-    <%= topic_title_link (topic), :class => "entry-title", :rel => "bookmark" %>
-    <%#= link_to h(topic.title), topic_path(@forum, topic), :class => "entry-title", :rel => "bookmark" %>
-    <%= "</strong>" if topic.sticky? %>
-    <% if topic.paged? -%>
-    <small><%= link_to 'last', forum_topic_path(:forum_id => @forum, :id => topic, :page => topic.last_page) %></small>
+
+    <h5 style="margin-bottom:1.0em;"><%= t('moderators') %></h5>
+
+    <% unless @forum.moderators.empty? -%>
+      <ul class="flat" style="margin-top:1em;">
+        <% @forum.moderators.each do |user| -%>
+          <li><%= link_to user.display_name, member_path(user) %></li>
+        <% end -%>
+      </ul>
+    <% else -%>
+      <p><%= t('forum_is_unmoderated') %></p>
+      <p><%= t('please_be_courteous') %></p>
     <% end -%>
-  </td>
-  <td class="ca inv stat"><%= topic.posts.size %></td>
-  <td class="ca inv stat"><%= number_with_delimiter(topic.views) %></td>
-  <td class="lp">
-    <abbr class="updated" title="<%= topic.replied_at.xmlschema %>"><%= time_ago_in_words(topic.replied_at) %></abbr>
-    <%= raw t('by_user', user:  "<span class=\"author\"><strong class=\"fn\">#{h(topic.replied_by_user.display_name)}</strong></span>") %>
-    <span><%= link_to 'view', forum_topic_path(:forum_id => @forum, :id => topic, :page => topic.last_page, :anchor => "posts-#{topic.last_post_id}") %></span>
-  </td>
-</tr>
-<% end %>
-</table>
 
-<%= will_paginate @topics %>
+  <% end %>
 
-<% if logged_in? %>
-<p><%= link_to t('new_topic'), new_forum_topic_path(@forum), :class => "utility" %></p>
-<% end%>
+  <div class="crumbs">
+    <%= link_to t('forums_title'), forums_path %> <span class="arrow">&rarr;</span>
+  </div>
+  <div style="clear: both;"></div>
+
+  <div id="forum-block" class="bchip">
+    <div class="widget-wrap">
+      <h2 class="chip-header"><em><%= h @forum.name %></em></h2>
+      <div id="info-widget">
+        <%= feed_icon_tag @forum.name, forum_posts_path(@forum, :format => :rss) %>
+        <%= topics_locale(@forum.topics.count) %>,
+        <%= posts_locale(@forum.posts.count) %>
+      </div>
+    </div>
+
+    <div class="inner">
+      <table border="0" cellspacing="0" cellpadding="0" class="wide topics">
+        <tr>
+          <th class="l-cell la" width="60%" colspan="1"><%= t('topic_title') %></th>
+          <th width="5%"><%= t('posts_title') %></th>
+          <th width="5%"><%= t('views_title')%></th>
+          <th class="la" width="30%"><%= t('last_post') %></th>
+        </tr>
+        <% forum_counter = 0 %>
+        <% for topic in @topics %>
+          <% forum_counter = forum_counter + 1 %>
+          <tr class="hentry<% if forum_counter % 2 == 0 %> stripe<% end %>">
+            <!--
+				<td style="padding:5px; width:16px;" class="c1">
+				<%
+            #icon = "comment"
+            #color = ""
+            #if topic.locked?
+            #icon = "lock"
+            #post = ", this topic is locked."[:comma_locked_topic]
+            #color = "darkgrey"
+            #end
+          %>
+				<%# if recent_topic_activity(topic) %>
+					<%#= image_tag "clearbits/#{icon}.gif", :class => "icon green", :title => "Recent activity"[]+"#{post}", :plugin => "savage_beast" %>
+				<%# else %>
+					<%#= image_tag "clearbits/#{icon}.gif", :class => "icon grey #{color}", :title => "No recent activity"[]+"#{post}", :plugin => "savage_beast" %>
+				<%# end %>
+				</td>
+				-->
+            <td class="l-cell c2">
+              <%= raw(t('sticky_title')+": <strong>") if topic.sticky? %>
+              <%= topic_title_link (topic), :class => "entry-title", :rel => "bookmark" %>
+              <%#= link_to h(topic.title), topic_path(@forum, topic), :class => "entry-title", :rel => "bookmark" %>
+              <%= "</strong>" if topic.sticky? %>
+              <% if topic.paged? -%>
+                <small><%= link_to 'last', forum_topic_path(:forum_id => @forum, :id => topic, :page => topic.last_page) %></small>
+              <% end -%>
+            </td>
+            <td class="ca inv stat"><%= topic.posts.size %></td>
+            <td class="ca inv stat"><%= number_with_delimiter(topic.views) %></td>
+            <td class="lp">
+              <abbr class="updated" title="<%= topic.replied_at.xmlschema %>"><%= time_ago_in_words(topic.replied_at) %></abbr>
+              <br />
+              <%= raw t('by_user', user:  "<span class=\"author\"><strong class=\"fn\">#{h(topic.replied_by_user.display_name)}</strong></span>") %>
+              <span><%= link_to 'view', forum_topic_path(:forum_id => @forum, :id => topic, :page => topic.last_page, :anchor => "posts-#{topic.last_post_id}") %></span>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+    <div class="bottom-cap"></div>
+  </div>
+
+  <div class="widget-bot" style="float: right;">
+    <%#= next_page @topics %>
+    <%= will_paginate @topics %>
+  </div>
+  <div style="clear: both;"></div>
+
+  <% if logged_in? %>
+    <%= link_to t('new_topic'), new_forum_topic_path(@forum), :class => "outer utility" %>
+  <% end%>
+
+  <div id="bottom-ads">
+    <div class="ad-728-90"><%= ad_chip('forum-1') %></div>
+  </div>
+</div>
+
+<div id="content-right">
+  <div id="side-ad-top" class="ad-160-600"><%= ad_chip('forum-2') %></div>
+  <div class="ad-160-600"><%= ad_chip('forum-3') %></div>
+</div>
