@@ -1,6 +1,6 @@
 class TopicsController < ApplicationController
-  before_filter :find_forum_and_topic, :except => :index
-  before_filter :login_required, :only => [:new, :create, :edit, :update, :destroy]
+  before_action :find_forum_and_topic, :except => :index
+  before_action :login_required, :only => [:new, :create, :edit, :update, :destroy]
 
 	# @WBH@ TODO: This uses the caches_formatted_page method.  In the main Beast project, this is implemented via a Config/Initializer file.  Not
 	# sure what analogous place to put it in this plugin.  It don't work in the init.rb  
@@ -11,7 +11,7 @@ class TopicsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to forum_path(params[:forum_id]) }
       format.xml do
-        @topics = Topic.paginate_by_forum_id(params[:forum_id], :order => 'sticky desc, replied_at desc', :page => params[:page])
+        @topics = Topic.where(forum_id: params[:forum_id]).order('sticky desc, replied_at desc').paginate(:page => params[:page])
         render :xml => @topics.to_xml
       end
     end
@@ -30,15 +30,15 @@ class TopicsController < ApplicationController
         (session[:topics] ||= {})[@topic.id] = Time.now.utc if logged_in?
         # authors of topics don't get counted towards total hits
         @topic.hit! unless logged_in? and @topic.user == current_user
-        @posts = @topic.posts.paginate :page => params[:page]
-        User.find(:all, :conditions => ['id IN (?)', @posts.collect { |p| p.user_id }.uniq]) unless @posts.blank?
+        @posts = @topic.posts.paginate(:page => params[:page])
+        User.where('id IN (?)', @posts.collect { |p| p.user_id }.uniq) unless @posts.blank?
         @post   = Post.new
       end
       format.xml do
         render :xml => @topic.to_xml
       end
       format.rss do
-        @posts = @topic.posts.find(:all, :order => 'created_at desc', :limit => 25)
+        @posts = @topic.posts.order('created_at desc').limit(25)
         render :action => 'show', :layout => false
       end
     end

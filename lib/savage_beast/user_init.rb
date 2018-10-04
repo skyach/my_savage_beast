@@ -26,7 +26,7 @@ module SavageBeast
 				end
 				
         def moderator_of?(forum)
-          moderatorships.count(:all, :conditions => ['forum_id = ?', (forum.is_a?(Forum) ? forum.id : forum)]) == 1
+          moderatorships.where('forum_id = ?', (forum.is_a?(Forum) ? forum.id : forum)).count == 1
         end
 
         def to_xml(options = {})

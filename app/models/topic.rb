@@ -12,10 +12,10 @@ class Topic < ActiveRecord::Base
   has_many :monitorships
   has_many :monitors, -> { where("#{Monitorship.table_name}.active = ?", true ) }, :through => :monitorships , :source => :user
 
-  has_many :posts,  -> { order("#{Post.table_name}.created_at") }, :dependent => :delete_all
+  has_many :posts, -> { order("#{Post.table_name}.created_at") }, :dependent => :delete_all
   has_one  :recent_post, -> { order("#{Post.table_name}.created_at DESC") }, :class_name => 'Post'
   
-  has_many :voices, -> { uniq } , :through => :posts, :source => :user
+  has_many :voices, :through => :posts, :source => :user
   belongs_to :replied_by_user, :foreign_key => "replied_by", :class_name => "User"
 
   # attr_accessible :title
@@ -73,9 +73,7 @@ class Topic < ActiveRecord::Base
       # if the topic moved forums
       if !frozen? && @old_forum_id && @old_forum_id != forum_id
         set_post_forum_id
-        Forum.where('id = ?', @old_forum_id).update_all('topics_count = ?, posts_count = ?',
-          Topic.where(:forum_id => @old_forum_id).count,
-          Post.where(:forum_id => @old_forum_id).count)
+        Forum.where('id = ?', @old_forum_id).update_all(topics_count:  Topic.where(:forum_id => @old_forum_id).count, posts_count: Post.where(:forum_id => @old_forum_id).count)
       end
       # if the topic moved forums or was deleted
       if frozen? || (@old_forum_id && @old_forum_id != forum_id)

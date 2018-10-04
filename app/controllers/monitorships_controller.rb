@@ -1,5 +1,5 @@
 class MonitorshipsController < ApplicationController
-  before_filter :login_required
+  before_action :login_required
 
   cache_sweeper :monitorships_sweeper, :only => [:create, :destroy]
 
