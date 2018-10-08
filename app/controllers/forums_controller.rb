@@ -32,7 +32,7 @@ class ForumsController < ApplicationController
 
   # new renders new.html.erb  
   def create
-    @forum.attributes = params[:forum]
+    @forum.attributes = forum_params
     @forum.save!
     respond_to do |format|
       format.html { redirect_to @forum }

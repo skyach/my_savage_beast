@@ -44,7 +44,7 @@ module SavageBeast
 			end
 			
 			def search(query, options = {})
-				with_scope :find => { :conditions => build_search_conditions(query) } do
+				where(build_search_conditions(query)) do
 					options[:page] ||= nil
 					paginate options
 				end
@@ -57,7 +57,8 @@ module SavageBeast
 			end
 			
 			def moderator_of?(forum)
-				moderatorships.count("#{Moderatorship.table_name}.id", :conditions => ['forum_id = ?', (forum.is_a?(Forum) ? forum.id : forum)]) == 1
+				# moderatorships.count("#{Moderatorship.table_name}.id", :conditions => ['forum_id = ?', (forum.is_a?(Forum) ? forum.id : forum)]) == 1
+				moderatorships.where('forum_id = ?', (forum.is_a?(Forum) ? forum.id : forum)).count == 1
 			end
 			
 			def to_xml(options = {})
@@ -71,7 +72,8 @@ module SavageBeast
 			end
 			
 			def update_posts_count(id)
-				User.update_all ['posts_count = ?', Post.count(:id, :conditions => {:user_id => id})],   ['id = ?', id]
+				# User.update_all ['posts_count = ?', Post.count(:id, :conditions => {:user_id => id})],   ['id = ?', id]
+				User.where('id = ?', id).update_all(posts_count: Post.where(:user_id => id).count)
 			end
 			
     end

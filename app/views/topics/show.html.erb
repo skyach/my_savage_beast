@@ -48,7 +48,7 @@
 
   <div id="forum-block" class="bchip">
     <div class="widget-wrap">
-      <h2 id="topic-title" class="chip-header" <%= %( onmouseover="$('topic_mod').show();" onmouseout="$('topic_mod').hide();") if logged_in? %>>
+      <h2 id="topic-title" class="chip-header" <%= raw %( onmouseover="$('topic_mod').show();" onmouseout="$('topic_mod').hide();") if logged_in? %>>
         <em>
           <%= h @topic.title %>
           <% if @topic.locked? %>
@@ -56,10 +56,10 @@
           <% end %>
           <% if logged_in? %>
     <span style="display:none;" id="topic_mod">
-      <% if @topic.editable_by?(current_user) -%>
+      <% if @topic.editable_by?(current_user) %>
         <%= link_to('edit', edit_forum_topic_path(@forum, @topic), :class => "utility") %> |
         <%= link_to('delete', forum_topic_path(@forum, @topic), :class => "utility", :method => :delete, :confirm => t('delete_topic_conf')) %>
-      <% end -%>
+      <% end %>
     </span>
           <% end %>
         </em>
@@ -116,10 +116,9 @@
                 <p>
                   <span class="edit">
                     <%= ajax_spinner_for "edit-post-#{post.id}", "spinner_bounce.gif" %>
-                    <%= link_to_remote('Edit post',
-                                       {:url => edit_post_path(:forum_id => @forum, :topic_id => @topic, :id => post), :method => :get,
-                                        :before => "EditForm.init(#{post.id});", :condition => "!EditForm.isEditing(#{post.id})" },
-                                       {:href => edit_post_path(:forum_id => @forum, :topic_id => @topic, :id => post, :page => params[:page]), :class => "utility"}) %>
+                    <%= link_to('Edit post',
+                                       edit_post_path(:forum_id => @forum, :topic_id => @topic, :id => post), :method => :get,
+                                       :class => "utility", remote: true) %>
                   </span>
                 </p>
               <% end -%>
@@ -146,7 +145,7 @@
     <div id="edit"></div>
     <% if @topic.locked? %>
       <p>
-        <%= image_tag "clearbits/lock.gif", :class => "icon grey", :title => t('topic_locked_title'), :plugin => "savage_beast" %>
+        <%= image_tag "my_savage_beast/clearbits/lock.gif", :class => "icon grey", :title => t('topic_locked_title') %>
         <label><%= t('locked_topic') %>.</label>
       </p>
     <% else %>

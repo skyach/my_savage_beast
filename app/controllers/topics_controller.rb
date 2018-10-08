@@ -48,15 +48,15 @@ class TopicsController < ApplicationController
     topic_saved, post_saved = false, false
 		# this is icky - move the topic/first post workings into the topic model?
     Topic.transaction do
-	    @topic  = @forum.topics.build(params[:topic])
+	    @topic  = @forum.topics.build(topic_params)
       assign_protected
-      @post       = @topic.posts.build(params[:topic])
+      @post       = @topic.posts.build(post_params)
       @post.topic = @topic
       @post.user  = current_user
       # only save topic if post is valid so in the view topic will be a new record if there was an error
       @topic.body = @post.body # incase save fails and we go back to the form
       topic_saved = @topic.save if @post.valid?
-      post_saved = @post.save 
+      post_saved = @post.save
     end
 		
 		if topic_saved && post_saved
@@ -70,7 +70,7 @@ class TopicsController < ApplicationController
   end
   
   def update
-    @topic.attributes = params[:topic]
+    @topic.attributes = topic_params
     assign_protected
     @topic.save!
     respond_to do |format|
@@ -81,11 +81,22 @@ class TopicsController < ApplicationController
   
   def destroy
     @topic.destroy
-    flash[:notice] = "Topic '{title}' was deleted."[:topic_deleted_message, @topic.title]
+    flash[:notice] = t(:topic_deleted_message,title: @topic.title)
     respond_to do |format|
       format.html { redirect_to forum_path(@forum) }
       format.xml  { head 200 }
     end
+  end
+
+  private
+
+  def topic_params
+    params.require(:topic).permit(:title, :sticky, :locked, :body, :forum_id)
+  end
+
+
+  def post_params
+    params.require(:topic).permit(:body)
   end
   
   protected

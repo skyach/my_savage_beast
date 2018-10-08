@@ -80,7 +80,7 @@ class PostsController < ApplicationController
   end
   
   def update
-    @post.attributes = params[:post]
+    @post.attributes = post_params
     @post.save!
   rescue ActiveRecord::RecordInvalid
     flash[:bad_reply] = 'An error occurred'[:error_occured_message]
@@ -96,7 +96,7 @@ class PostsController < ApplicationController
 
   def destroy
     @post.destroy
-    flash[:notice] = "Post of '{title}' was deleted."[:post_deleted_message, @post.topic.title]
+    flash[:notice] = t(:post_deleted_message, title: @post.topic.title)
     respond_to do |format|
       format.html do
         redirect_to(@post.topic.frozen? ? 
@@ -105,6 +105,12 @@ class PostsController < ApplicationController
       end
       format.xml { head 200 }
     end
+  end
+
+  private
+
+  def post_params
+    params.require(:post).permit(:body)
   end
 
   protected
