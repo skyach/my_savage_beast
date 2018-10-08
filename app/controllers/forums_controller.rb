@@ -41,7 +41,7 @@ class ForumsController < ApplicationController
   end
 
   def update
-    @forum.update_attributes!(params[:forum])
+    @forum.update_attributes!(forum_params)
     respond_to do |format|
       format.html { redirect_to @forum }
       format.xml  { head 200 }
@@ -55,7 +55,14 @@ class ForumsController < ApplicationController
       format.xml  { head 200 }
     end
   end
-  
+
+
+  private
+
+  def forum_params
+    params.require(:forum).permit(:name, :position, :description)
+  end
+
   protected
     def find_or_initialize_forum
       @forum = params[:id] ? Forum.find(params[:id]) : Forum.new
