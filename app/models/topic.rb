@@ -18,6 +18,8 @@ class Topic < ActiveRecord::Base
   has_many :voices, :through => :posts, :source => :user
   belongs_to :replied_by_user, :foreign_key => "replied_by", :class_name => "User"
 
+  has_one :feed_item, :as => 'attachable', :dependent => :destroy
+
   # attr_accessible :title
   # to help with the create form
   attr_accessor :body
