@@ -1,53 +1,83 @@
-<% @page_title = search_posts_title -%>
-
-<h1>
-<% if params[:q].blank? -%>
-  <%= @page_title %>
-<% else -%>
-  <%= 'Searching for' %> '<%= h params[:q] %>'
+<% @page_title = "ViewGuide Forum > Recent Posts" %>
+<% @page_id = "forum" %>
+<%= content_for :page_stylesheet do %>
+  <%= stylesheet_link_tag 'forum' %>
 <% end -%>
-</h1>
-<p class="subtitle">
-  <%= feed_icon_tag @page_title, search_posts_path(true) %>
-  <%= posts_count_locale(@posts.total_entries) %>
-</p>
+<%# @page_title = search_posts_title -%>
 
-<%= will_paginate @posts %>
 
-<table border="0" cellspacing="0" cellpadding="0" class="posts wide">
-<% for post in @posts do %>
-<% unless post == @posts.first %>
-<tr class="spacer">
-  <td colspan="2">&nbsp;</td>
-</tr>
-<% end %>
-<tr class="post hentry" id="<%= dom_id post %>">
-  <td class="author vcard">
-    <div class="date">
-      <abbr class="updated" title="<%= post.created_at.xmlschema %>">
-      <% if post.created_at > Time.now.utc-24.hours%>
-      <%= time_ago_in_words(post.created_at).sub(/about /, '') %>
-      <% else %>
-      <%= post.created_at.strftime(t('date_format'))%>
-      <% end %>
-      </abbr>
+<div id="content-left">
+  <div id="forum-block" class="bchip">
+    <div class="widget-wrap">
+      <h2 class="chip-header">
+        <em>
+          <% if params[:q].blank? -%>
+            <%#= @page_title %>
+            Recent Posts
+          <% else -%>
+            <%= 'Searching for' %> '<%= h params[:q] %>'
+          <% end -%>
+        </em>
+      </h2>
+      <div id="info-widget">
+        <%= feed_icon_tag @page_title, search_posts_path(true) %>
+        <% count=@posts.total_entries %>
+        <%= count == 1 ? t(:post_count_found, count: number_with_delimiter(count)) : t(:posts_count_found, count: number_with_delimiter(count)) %>
+      </div>
     </div>
+    <div class="inner">
+      <table border="0" cellspacing="0" cellpadding="0" class="posts wide">
+        <% posts_counter = 0 %>
+        <% for post in @posts do %>
+          <% posts_counter = posts_counter + 1 %>
+          <%# unless post == @posts.first %>
+          <!--
+                  <tr class="spacer">
+                    <td colspan="2">&nbsp;</td>
+                  </tr>
+          -->
+          <%# end %>
+          <tr class="post hentry<% if posts_counter % 2 == 0 %> stripe<% end %>" id="<%= dom_id post %>">
+            <td class="author vcard">
+              <div class="date">
+                <abbr class="updated" title="<%= post.created_at.xmlschema %>">
+                  <% if post.created_at > Time.now.utc-24.hours%>
+                    <%= time_ago_in_words(post.created_at).sub(/about /, '') %>
+                  <% else %>
+                    <%= post.created_at.strftime("%b %e, %Y")%>
+                  <% end %>
+                </abbr>
+              </div>
 
-    <%= avatar_for @users[post.user_id] %>
-    <span class="fn"><%= link_to truncate(h(@users[post.user_id].display_name), 15), user_path(post.user_id) %></span>
-    <span class="posts"><%= posts_locale(@users[post.user_id].posts.count) %></span>
-  </td>
-  <td class="body entry-content">
-    <p class="topic">
-      <%= t('topic_title') %>: <%= link_to h(post.forum_name), forum_path(post.forum_id) %> /
-      <%= link_to h(post.topic_title), forum_topic_path(post.forum_id, post.topic_id) %>
-    </p>
-    
-    <%= post.body_html %>
-  </td>
-</tr>
+              <%#= avatar_for @users[post.user_id] %>
+              <span class="fn"><%= link_to truncate(h(@users[post.user_id].display_name), lenght: 15), member_path(post.user_id) %></span>
+              <span class="posts"><%= t((count=@users[post.user_id].posts.size)==1 ? :post_count : :posts_count, count: number_with_delimiter(count)) %></span>
+            </td>
+            <td class="body entry-content">
+              <p class="topic">
+                <%= t(:topic_title) %>: <%= link_to h(post.forum_name), forum_path(post.forum_id) %> /
+                <%= link_to h(post.topic_title), topic_path(post.forum_id, post.topic_id) %>
+              </p>
+              <%= raw post.body_html %>
+            </td>
+          </tr>
 
-<% end %>
-</table>
+        <% end %>
+      </table>
+    </div>
+    <div class="bottom-cap"></div>
+  </div>
+  <div class="widget-bot" style="float: right;">
+    <%#= next_page @posts %>
+    <%= will_paginate @posts %>
+  </div>
+  <div style="clear: both;"></div>
+  <div id="bottom-ads">
+    <div class="ad-728-90"><%= ad_chip('forum-1') %></div>
+  </div>
+</div>
 
-<%= will_paginate @posts %>
+<div id="content-right">
+  <div id="side-ad-top" class="ad-160-600"><%= ad_chip('forum-2') %></div>
+  <div class="ad-160-600"><%= ad_chip('forum-3') %></div>
+</div>
